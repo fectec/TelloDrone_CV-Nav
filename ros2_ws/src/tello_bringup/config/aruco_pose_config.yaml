@@ -1,0 +1,29 @@
+tello_downward_camera_publisher:
+  ros__parameters:
+    update_rate: 60.0
+    image_topic: "/downward/image_raw"
+    auto_connect: True
+    retry_count: 3
+
+aruco_detector:
+  ros__parameters:
+    update_rate: 30.0           
+    simulation: True
+    sim_image_topic: "/downward/image_raw"
+    real_image_topic: "/downward/image_raw"
+    dictionary_id: 2
+    marker_size: 0.17
+    publish_debug_image: True
+    visualize_axes: True
+
+    camera_matrix:
+      [500.0, 0.0, 320.0,
+       0.0, 500.0, 240.0,
+       0.0, 0.0, 1.0]
+    distortion_coeffs: [0.0, 0.0, 0.0, 0.0, 0.0]
+
+    corner_refinement: 1
+    adaptive_thresh_constant: 7.0
+    min_marker_perimeter_rate: 0.03
+    max_marker_perimeter_rate: 4.0
+        
