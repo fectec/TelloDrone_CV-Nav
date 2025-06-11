@@ -5,25 +5,27 @@ tello_downward_camera_publisher:
     auto_connect: True
     retry_count: 3
 
-aruco_detector:
+drone_pose_estimator:
   ros__parameters:
-    update_rate: 30.0           
-    simulation: True
-    sim_image_topic: "/downward/image_raw"
-    real_image_topic: "/downward/image_raw"
-    dictionary_id: 2
-    marker_size: 0.17
-    publish_debug_image: True
-    visualize_axes: True
-
-    camera_matrix:
-      [500.0, 0.0, 320.0,
-       0.0, 500.0, 240.0,
-       0.0, 0.0, 1.0]
+    update_rate: 30.0
+    image_topic: "/downward/image_raw"
+    
+    camera_matrix: [226.88179248, 0.0, 160.67144106,
+                    0.0, 227.22020997, 117.68560542,
+                    0.0, 0.0, 1.0]
     distortion_coeffs: [0.0, 0.0, 0.0, 0.0, 0.0]
-
-    corner_refinement: 1
-    adaptive_thresh_constant: 7.0
-    min_marker_perimeter_rate: 0.03
-    max_marker_perimeter_rate: 4.0
-        
+    
+    board_squares_x: 9
+    board_squares_y: 24
+    square_length: 0.1      
+    marker_length: 0.08     
+    aruco_dict: "DICT_4X4_250"
+    center_board_origin: True
+    min_corners_detected: 6
+    
+    world_frame: "world"
+    board_frame: "charuco_board"
+    drone_frame: "drone"
+    
+    publish_debug_image: True
+    publish_tf: True

@@ -18,8 +18,9 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'tello_downward_camera = tello_vision.tello_downward_camera:main',
+            'downward_camera = tello_vision.downward_camera:main',
             'aruco_detector = tello_vision.aruco_detector:main',
+            'pose_estimator = tello_vision.pose_estimator:main',
         ],
     },
 )

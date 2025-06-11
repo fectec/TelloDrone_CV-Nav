@@ -8,23 +8,23 @@ def generate_launch_description():
     pkg_bringup = get_package_share_directory('tello_bringup')
     shared_param_file = os.path.join(pkg_bringup, 'config', 'aruco_pose_config.yaml')
 
-    tello_downward_camera_node = Node(
+    downward_camera_node = Node(
         package='tello_vision',
-        executable='tello_downward_camera',
-        name='tello_downward_camera',
+        executable='downward_camera',
+        name='downward_camera',
         parameters=[shared_param_file],
         output='screen'
     )
 
-    aruco_detector_node = Node(
+    pose_estimator = Node(
         package='tello_vision',
-        executable='aruco_detector',
-        name='aruco_detector',
+        executable='pose_estimator',
+        name='pose_estimator',
         parameters=[shared_param_file],
         output='screen'
     )
 
     return LaunchDescription([
-        tello_downward_camera_node,
-        aruco_detector_node
+        downward_camera_node,
+        pose_estimator
     ])

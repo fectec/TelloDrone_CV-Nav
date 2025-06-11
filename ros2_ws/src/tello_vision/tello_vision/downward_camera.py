@@ -24,7 +24,7 @@ class TelloDownwardCameraPublisher(Node):
     """
 
     def __init__(self):
-        super().__init__('tello_downward_camera_publisher')
+        super().__init__('downward_camera_publisher')
 
         # Declare parameters
         self.declare_parameter('update_rate', 60.0)

@@ -41,7 +41,7 @@ class ArucoDetector(Node):
         
         # Declare parameters
         self.declare_parameter('update_rate', 30.0)                                 # Hz
-        self.declare_parameter('simulation', True)  
+        self.declare_parameter('simulation', False)  
         self.declare_parameter('sim_image_topic', '/downward/image_raw') 
         self.declare_parameter('real_image_topic', '/downward/image_raw') 
         self.declare_parameter('dictionary_id', 2)  
