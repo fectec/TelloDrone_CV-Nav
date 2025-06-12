@@ -144,14 +144,18 @@ class CharuCoPoseEstimator(Node):
         self.pose_pub = self.create_publisher(
             PoseStamped,
             'drone/pose',
-            10
+            qos_profile=qos.QoSProfile(
+                depth=10,
+                reliability=qos.ReliabilityPolicy.RELIABLE,
+                durability=qos.DurabilityPolicy.VOLATILE
+            )
         )
         
         if self.publish_debug_image:
             self.debug_image_pub = self.create_publisher(
                 Image,
                 'drone/debug_image',
-                10
+                qos_profile=qos.qos_profile_sensor_data  
             )
         
         # Create TF broadcaster
@@ -558,7 +562,6 @@ class CharuCoPoseEstimator(Node):
         """Clean up before shutting down."""
         super().destroy_node()
 
-
 def main(args=None):
     rclpy.init(args=args)
     
@@ -577,7 +580,6 @@ def main(args=None):
         node.destroy_node()
         if rclpy.ok():
             rclpy.shutdown()
-
 
 if __name__ == '__main__':
     main()

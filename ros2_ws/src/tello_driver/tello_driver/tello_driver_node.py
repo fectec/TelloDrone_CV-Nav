@@ -11,6 +11,7 @@ import numpy as np
 
 import rclpy
 from rclpy.node import Node
+from rclpy import qos
 from rclpy.parameter import Parameter
 from rcl_interfaces.msg import SetParametersResult
 
@@ -27,8 +28,6 @@ class TelloDriver(Node):
     - Stream downward camera images
     - Convert cmd_vel to RC commands
     - Handle takeoff/land/emergency commands
-    
-    This prevents connection conflicts between separate camera and control nodes.
     """
     def __init__(self):
         super().__init__('tello_driver')
@@ -48,15 +47,16 @@ class TelloDriver(Node):
         self.declare_parameter('cmd_vel_topic', 'cmd_vel')
         self.declare_parameter('enable_control', True)
         
-        # Velocity scaling factors
-        self.declare_parameter('linear_scale_xy', 10.0)
-        self.declare_parameter('linear_scale_z', 10.0)
-        self.declare_parameter('angular_scale_z', 10.0)
+        # Velocity scaling factors (convert m/s and rad/s to RC commands)
+        self.declare_parameter('linear_scale_xy', 100.0)    # m/s to RC [-100,100]
+        self.declare_parameter('linear_scale_z', 100.0)     # m/s to RC [-100,100]  
+        self.declare_parameter('angular_scale_z', 57.3)     # rad/s to RC (180/π ≈ 57.3)
         
         # Safety parameters
-        self.declare_parameter('auto_takeoff_height', 0.5)            # m
-        self.declare_parameter('cmd_timeout', 0.5)                    # s
-        
+        self.declare_parameter('max_rc_value', 30)          
+        self.declare_parameter('auto_takeoff_height', 0.5)  # m
+        self.declare_parameter('cmd_timeout', 0.5)          # s
+
         # Retrieve parameters
         self.auto_connect = self.get_parameter('auto_connect').value
         self.retry_count = self.get_parameter('retry_count').value
@@ -73,6 +73,7 @@ class TelloDriver(Node):
         self.linear_scale_z = self.get_parameter('linear_scale_z').value
         self.angular_scale_z = self.get_parameter('angular_scale_z').value
         
+        self.max_rc_value = self.get_parameter('max_rc_value').value
         self.auto_takeoff_height = self.get_parameter('auto_takeoff_height').value
         self.cmd_timeout = self.get_parameter('cmd_timeout').value
         
@@ -88,20 +89,26 @@ class TelloDriver(Node):
         
         # Validate initial parameters
         init_params = [
-            Parameter('auto_connect', Parameter.Type.BOOL, self.auto_connect),
-            Parameter('retry_count', Parameter.Type.INTEGER, self.retry_count),
-            Parameter('camera_rate', Parameter.Type.DOUBLE, self.camera_rate),
-            Parameter('image_topic', Parameter.Type.STRING, self.image_topic),
-            Parameter('enable_camera', Parameter.Type.BOOL, self.enable_camera),
-            Parameter('control_rate', Parameter.Type.DOUBLE, self.control_rate),
-            Parameter('cmd_vel_topic', Parameter.Type.STRING, self.cmd_vel_topic),
-            Parameter('enable_control', Parameter.Type.BOOL, self.enable_control),
-            Parameter('linear_scale_xy', Parameter.Type.DOUBLE, self.linear_scale_xy),
-            Parameter('linear_scale_z', Parameter.Type.DOUBLE, self.linear_scale_z),
-            Parameter('angular_scale_z', Parameter.Type.DOUBLE, self.angular_scale_z),
-            Parameter('auto_takeoff_height', Parameter.Type.DOUBLE, self.auto_takeoff_height),
-            Parameter('cmd_timeout', Parameter.Type.DOUBLE, self.cmd_timeout),
+            Parameter('auto_connect',           Parameter.Type.BOOL,    self.auto_connect),
+            Parameter('retry_count',            Parameter.Type.INTEGER, self.retry_count),
+            Parameter('camera_rate',            Parameter.Type.DOUBLE,  self.camera_rate),
+            Parameter('image_topic',            Parameter.Type.STRING,  self.image_topic),
+            Parameter('enable_camera',          Parameter.Type.BOOL,    self.enable_camera),
+            Parameter('control_rate',           Parameter.Type.DOUBLE,  self.control_rate),
+            Parameter('cmd_vel_topic',          Parameter.Type.STRING,  self.cmd_vel_topic),
+            Parameter('enable_control',         Parameter.Type.BOOL,    self.enable_control),
+            Parameter('linear_scale_xy',        Parameter.Type.DOUBLE,  self.linear_scale_xy),
+            Parameter('linear_scale_z',         Parameter.Type.DOUBLE,  self.linear_scale_z),
+            Parameter('angular_scale_z',        Parameter.Type.DOUBLE,  self.angular_scale_z),
+            Parameter('max_rc_value',           Parameter.Type.INTEGER, self.max_rc_value),
+            Parameter('auto_takeoff_height',    Parameter.Type.DOUBLE,  self.auto_takeoff_height),
+            Parameter('cmd_timeout',            Parameter.Type.DOUBLE,  self.cmd_timeout),
         ]
+        
+        result = self.parameter_callback(init_params)
+        if not result.successful:
+            raise RuntimeError(f"Parameter validation failed: {result.reason}")
+
         
         result = self.parameter_callback(init_params)
         if not result.successful:
@@ -123,24 +130,87 @@ class TelloDriver(Node):
         
         # Create publishers
         if self.enable_camera:
-            self.image_pub = self.create_publisher(Image, self.image_topic, 10)
-        
-        self.battery_pub = self.create_publisher(Float32, 'tello/battery', 10)
-        self.connected_pub = self.create_publisher(Bool, 'tello/connected', 10)
-        self.flying_pub = self.create_publisher(Bool, 'tello/flying', 10)
-        
+            self.image_pub = self.create_publisher(
+                Image, 
+                self.image_topic, 
+                qos_profile=qos.qos_profile_sensor_data  
+            )
+
+        self.battery_pub = self.create_publisher(
+            Float32, 
+            'tello/battery', 
+            qos_profile=qos.QoSProfile(
+                depth=5,
+                reliability=qos.ReliabilityPolicy.BEST_EFFORT,
+                durability=qos.DurabilityPolicy.VOLATILE
+            )
+        )
+
+        self.connected_pub = self.create_publisher(
+            Bool, 
+            'tello/connected', 
+            qos_profile=qos.QoSProfile(
+                depth=5,
+                reliability=qos.ReliabilityPolicy.RELIABLE,
+                durability=qos.DurabilityPolicy.TRANSIENT_LOCAL  
+            )
+        )
+
+        self.flying_pub = self.create_publisher(
+            Bool, 
+            'tello/flying', 
+            qos_profile=qos.QoSProfile(
+                depth=5,
+                reliability=qos.ReliabilityPolicy.RELIABLE,
+                durability=qos.DurabilityPolicy.TRANSIENT_LOCAL  
+            )
+        )
+                
         # Create subscriptions
         if self.enable_control:
             self.create_subscription(
                 Twist,
                 self.cmd_vel_topic,
                 self.cmd_vel_callback,
-                10
+                qos_profile=qos.QoSProfile(
+                    depth=10,
+                    reliability=qos.ReliabilityPolicy.RELIABLE,
+                    durability=qos.DurabilityPolicy.VOLATILE
+                )
             )
-            
-            self.create_subscription(Empty, 'tello/takeoff', self.takeoff_callback, 10)
-            self.create_subscription(Empty, 'tello/land', self.land_callback, 10)
-            self.create_subscription(Empty, 'tello/emergency', self.emergency_callback, 10)
+
+            self.create_subscription(
+                Empty, 
+                'tello/takeoff', 
+                self.takeoff_callback, 
+                qos_profile=qos.QoSProfile(
+                    depth=5,
+                    reliability=qos.ReliabilityPolicy.RELIABLE,
+                    durability=qos.DurabilityPolicy.VOLATILE
+                )
+            )
+
+            self.create_subscription(
+                Empty, 
+                'tello/land', 
+                self.land_callback, 
+                qos_profile=qos.QoSProfile(
+                    depth=5,
+                    reliability=qos.ReliabilityPolicy.RELIABLE,
+                    durability=qos.DurabilityPolicy.VOLATILE
+                )
+            )
+
+            self.create_subscription(
+                Empty, 
+                'tello/emergency', 
+                self.emergency_callback, 
+                qos_profile=qos.QoSProfile(
+                    depth=5,
+                    reliability=qos.ReliabilityPolicy.RELIABLE,
+                    durability=qos.DurabilityPolicy.VOLATILE
+                )
+            )
         
         # Auto-connect if enabled
         if self.auto_connect:
@@ -158,7 +228,7 @@ class TelloDriver(Node):
             success = False
             for attempt in range(1, self.retry_count + 1):
                 try:
-                    self.get_logger().info(f"Connecting to Tello... (attempt {attempt}/{self.retry_count})")
+                    self.get_logger().info(f"Connecting to Tello... (attempt {attempt}/{self.retry_count}).")
                     self.tello = Tello()
                     self.tello.connect()
                     
@@ -264,8 +334,8 @@ class TelloDriver(Node):
                 battery_msg = Float32()
                 battery_msg.data = float(battery)
                 self.battery_pub.publish(battery_msg)
-            except:
-                pass
+            except Exception as e:
+                self.get_logger().debug(f"Battery read failed: {e}")
         
         # Send RC commands if flying
         if not self.connected or self.tello is None or not self.is_flying:
@@ -278,17 +348,19 @@ class TelloDriver(Node):
             self.send_rc_control(0, 0, 0, 0)
             return
         
-        # Convert cmd_vel to RC commands
+        # Convert cmd_vel to RC commands (scale from m/s to RC range)
+        # Tello RC commands expect values in range [-100, 100]
         left_right = int(self.current_cmd.linear.y * self.linear_scale_xy)
         forward_backward = int(self.current_cmd.linear.x * self.linear_scale_xy)
         up_down = int(self.current_cmd.linear.z * self.linear_scale_z)
         yaw = int(self.current_cmd.angular.z * self.angular_scale_z)
         
-        # Clamp to valid range
-        left_right = max(-10, min(10, left_right))
-        forward_backward = max(-10, min(10, forward_backward))
-        up_down = max(-10, min(10, up_down))
-        yaw = max(-10, min(10, yaw))
+        # Clamp to valid RC range [-100, 100] but make max configurable for safety
+        self.max_rc_value = min(100, int(self.get_parameter('self.max_rc_value').value))
+        left_right = max(-self.max_rc_value, min(self.max_rc_value, left_right))
+        forward_backward = max(-self.max_rc_value, min(self.max_rc_value, forward_backward))
+        up_down = max(-self.max_rc_value, min(self.max_rc_value, up_down))
+        yaw = max(-self.max_rc_value, min(self.max_rc_value, yaw))
         
         # Send RC control
         self.send_rc_control(left_right, forward_backward, up_down, yaw)
@@ -328,9 +400,9 @@ class TelloDriver(Node):
             self.is_flying = True
             
             # Move up to desired height if needed
-            if self.auto_takeoff_height > 0.3:  # Tello takeoff is ~0.3m
+            if self.auto_takeoff_height > 0.3:                             # Tello takeoff is ~0.3m
                 height_diff = int((self.auto_takeoff_height - 0.3) * 100)  # cm
-                if height_diff > 20:  # Only move if significant
+                if height_diff > 20:                                       # Only move if significant
                     self.tello.move_up(height_diff)
             
             self.get_logger().info("Takeoff complete.")
@@ -382,13 +454,19 @@ class TelloDriver(Node):
                 if not isinstance(value, bool):
                     return SetParametersResult(successful=False, reason=f"{name} must be a bool.")
                 setattr(self, name, value)
-                self.get_logger().info(f"Updated {name}: {value}")
+                self.get_logger().info(f"Updated {name}: {value}.")
             
             elif name == 'retry_count':
                 if not isinstance(value, int) or value < 0:
                     return SetParametersResult(successful=False, reason="retry_count must be >= 0.")
                 self.retry_count = value
-                self.get_logger().info(f"Updated retry_count: {value}")
+                self.get_logger().info(f"Updated retry_count: {value}.")
+            
+            elif name == 'max_rc_value':
+                if not isinstance(value, int) or value < 1 or value > 100:
+                    return SetParametersResult(successful=False, reason="max_rc_value must be between 1 and 100.")
+                self.max_rc_value = value
+                self.get_logger().info(f"Updated max_rc_value: {value}.")
             
             elif name in ['camera_rate', 'control_rate']:
                 if not isinstance(value, (int, float)) or value <= 0:
@@ -401,7 +479,7 @@ class TelloDriver(Node):
                 elif name == 'control_rate' and self.enable_control:
                     self.control_timer.cancel()
                     self.control_timer = self.create_timer(1.0 / self.control_rate, self.control_callback)
-                self.get_logger().info(f"Updated {name}: {value}")
+                self.get_logger().info(f"Updated {name}: {value} Hz.")
             
             elif name in ['image_topic', 'cmd_vel_topic']:
                 if not isinstance(value, str):
@@ -410,8 +488,8 @@ class TelloDriver(Node):
                 self.get_logger().info(f"Updated {name}: {value}")
             
             elif name in ['linear_scale_xy', 'linear_scale_z', 'angular_scale_z']:
-                if not isinstance(value, (int, float)):
-                    return SetParametersResult(successful=False, reason=f"{name} must be a number.")
+                if not isinstance(value, (int, float)) or value <= 0:
+                    return SetParametersResult(successful=False, reason=f"{name} must be > 0.")
                 setattr(self, name, float(value))
                 self.get_logger().info(f"Updated {name}: {value}")
             
@@ -422,7 +500,7 @@ class TelloDriver(Node):
                 self.get_logger().info(f"Updated {name}: {value}")
         
         return SetParametersResult(successful=True)
-    
+
     def destroy_node(self):
         """Clean up before shutting down."""
         # Send zero velocities if flying
@@ -455,7 +533,6 @@ def main(args=None):
         node.destroy_node()
         if rclpy.ok():
             rclpy.shutdown()
-
 
 if __name__ == '__main__':
     main()

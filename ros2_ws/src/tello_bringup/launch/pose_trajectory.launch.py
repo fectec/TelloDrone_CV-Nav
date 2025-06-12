@@ -8,8 +8,16 @@ from ament_index_python.packages import get_package_share_directory
 def generate_launch_description():
     pkg_bringup = get_package_share_directory('tello_bringup')
     shared_param_file = os.path.join(pkg_bringup, 'config', 'pose_trajectory_config.yaml')
+
+    tello_driver_node = Node(
+        package='tello_driver',
+        executable='tello_driver_node',
+        name='tello_driver_node',
+        parameters=[shared_param_file],
+        output='screen'
+    )
     
-    pose_estimator = Node(
+    pose_estimator_node = Node(
         package='tello_vision',
         executable='pose_estimator',
         name='pose_estimator',
@@ -17,15 +25,15 @@ def generate_launch_description():
         output='screen'
     )
     
-    waypoints_publisher = Node(
+    waypoint_service_node = Node(
         package='tello_control',
-        executable='waypoints_publisher',
-        name='waypoints_publisher',
+        executable='waypoint_service',
+        name='waypoint_service',
         parameters=[shared_param_file],
         output='screen'
     )
     
-    pose_controller = Node(
+    pose_controller_node = Node(
         package='tello_control',
         executable='pose_controller',
         name='pose_controller',
@@ -34,7 +42,8 @@ def generate_launch_description():
     )
     
     return LaunchDescription([
-        pose_estimator,
-        waypoints_publisher,
-        pose_controller
+        tello_driver_node,
+        pose_estimator_node,
+        waypoint_service_node,
+        pose_controller_node
     ])

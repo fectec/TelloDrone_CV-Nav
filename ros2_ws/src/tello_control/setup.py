@@ -24,7 +24,7 @@ setup(
     entry_points={
         'console_scripts': [
             'pose_controller = tello_control.pose_controller:main',
-            'waypoints_publisher = tello_control.waypoints_publisher:main',
+            'waypoint_service = tello_control.waypoint_service:main',
         ],
     },
 )
