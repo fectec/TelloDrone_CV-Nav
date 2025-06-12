@@ -1,0 +1,24 @@
+pose_estimator:
+  ros__parameters:
+    update_rate: 30.0
+    image_topic: '/downward/image_raw'
+    
+    camera_matrix: [226.88179248, 0.0, 160.67144106,
+                    0.0, 227.22020997, 117.68560542,
+                    0.0, 0.0, 1.0]
+    distortion_coeffs: [0.0, 0.0, 0.0, 0.0, 0.0]
+    
+    board_squares_x: 9
+    board_squares_y: 24
+    square_length: 0.1
+    marker_length: 0.08
+    aruco_dict: 'DICT_4X4_250'
+    center_board_origin: true
+    min_corners_detected: 6
+    
+    world_frame: 'world'
+    board_frame: 'charuco_board'
+    drone_frame: 'drone'
+    
+    publish_debug_image: true
+    publish_tf: true

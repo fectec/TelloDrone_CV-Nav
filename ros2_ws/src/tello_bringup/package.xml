@@ -2,7 +2,7 @@
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
   <name>tello_bringup</name>
-  <version>0.0.0</version>
+  <version>0.1.0</version>
   <description>Bringup package for the RoboMaster TT Tello Talent Drone.</description>
   <maintainer email="fectec151@gmail.com">fectec</maintainer>
   <license>Apache-2.0</license>
@@ -12,10 +12,16 @@
   <build_depend>launch</build_depend>
   <build_depend>launch_ros</build_depend>
   <build_depend>tello_vision</build_depend>
+  <build_depend>tello_driver</build_depend>
+  <build_depend>tello_control</build_depend>
+  <build_depend>tello_utils</build_depend>
 
   <exec_depend>launch</exec_depend>
   <exec_depend>launch_ros</exec_depend>
   <exec_depend>tello_vision</exec_depend>
+  <exec_depend>tello_driver</exec_depend>
+  <exec_depend>tello_control</exec_depend>
+  <exec_depend>tello_utils</exec_depend>
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>

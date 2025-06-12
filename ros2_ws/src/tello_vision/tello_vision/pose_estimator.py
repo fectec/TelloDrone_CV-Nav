@@ -204,7 +204,7 @@ class CharuCoPoseEstimator(Node):
             
             # Log first frame info
             if self.frame_count == 1:
-                self.get_logger().info(f"First image received! Size: {msg.width}x{msg.height}, Encoding: {msg.encoding}")
+                self.get_logger().info(f"First image received! Size: {msg.width}x{msg.height}, Encoding: {msg.encoding}.")
                 
         except CvBridgeError as e:
             self.get_logger().error(f"Image conversion error: {e}")

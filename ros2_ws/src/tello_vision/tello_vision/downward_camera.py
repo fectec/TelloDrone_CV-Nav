@@ -27,7 +27,7 @@ class TelloDownwardCameraPublisher(Node):
         super().__init__('downward_camera_publisher')
 
         # Declare parameters
-        self.declare_parameter('update_rate', 60.0)
+        self.declare_parameter('update_rate', 60.0)                     # Hz
         self.declare_parameter('image_topic', '/downward/image_raw')
         self.declare_parameter('auto_connect', True)
         self.declare_parameter('retry_count', 3)
