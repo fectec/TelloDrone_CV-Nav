@@ -1,0 +1,81 @@
+tello_driver_node:
+  auto_connect: true
+  retry_count: 3
+
+  camera_rate: 30.0
+  image_topic: "/downward/image_raw"
+  enable_camera: true
+
+  control_rate: 50.0
+  cmd_vel_topic: "cmd_vel"
+  enable_control: true
+  
+  linear_scale_xy: 100.0
+  linear_scale_z: 100.0
+  angular_scale_z: 57.3
+
+  max_rc_value: 30
+  auto_takeoff_height: 0.5
+  cmd_timeout: 0.5
+
+pose_estimator:
+  update_rate: 30.0
+  image_topic: "/downward/image_raw"
+
+  camera_matrix: [226.88179248, 0.0, 160.67144106, 0.0, 227.22020997, 117.68560542, 0.0, 0.0, 1.0]
+  distortion_coeffs: [0.0, 0.0, 0.0, 0.0, 0.0]
+
+  board_squares_x: 9
+  board_squares_y: 24
+  square_length: 0.1
+  marker_length: 0.08
+  aruco_dict: "DICT_4X4_250"
+  center_board_origin: true
+  min_corners_detected: 6
+
+  world_frame: "world"
+  board_frame: "charuco_board"
+  drone_frame: "drone"
+
+  publish_debug_image: true
+  publish_tf: true
+
+waypoint_service:
+  service_name: "get_next_waypoint"
+  frame_id: "charuco_board"
+  custom_waypoints:
+    - 0.0
+    - 0.0
+    - 0.0
+    - 0.0
+
+pose_controller:
+  update_rate: 30.0
+
+  pose_topic: "drone/pose"
+  cmd_vel_topic: "cmd_vel"
+  waypoint_service: "get_next_waypoint"
+
+  pid_x_kp: 1.0
+  pid_x_ki: 0.0
+  pid_x_kd: 0.0
+
+  pid_y_kp: 1.0
+  pid_y_ki: 0.0
+  pid_y_kd: 0.0
+
+  pid_z_kp: 1.0
+  pid_z_ki: 0.0
+  pid_z_kd: 0.0
+
+  pid_yaw_kp: 1.0
+  pid_yaw_ki: 0.0
+  pid_yaw_kd: 0.0
+
+  max_linear_vel: 1.0
+  max_angular_vel: 1.0
+
+  position_tolerance: 0.1
+  yaw_tolerance: 0.1
+
+  control_enabled: true

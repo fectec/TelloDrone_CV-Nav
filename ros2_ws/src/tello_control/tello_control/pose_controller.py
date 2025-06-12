@@ -23,6 +23,7 @@ class PoseController(Node):
         
         # Declare parameters
         self.declare_parameter('update_rate', 30.0)                    # Hz
+
         self.declare_parameter('pose_topic', 'drone/pose')             
         self.declare_parameter('cmd_vel_topic', 'cmd_vel')
         self.declare_parameter('waypoint_service', 'get_next_waypoint')
@@ -31,12 +32,15 @@ class PoseController(Node):
         self.declare_parameter('pid_x_kp', 1.0)
         self.declare_parameter('pid_x_ki', 0.0)
         self.declare_parameter('pid_x_kd', 0.0)
+
         self.declare_parameter('pid_y_kp', 1.0)
         self.declare_parameter('pid_y_ki', 0.0)
         self.declare_parameter('pid_y_kd', 0.0)
+
         self.declare_parameter('pid_z_kp', 1.0)
         self.declare_parameter('pid_z_ki', 0.0)
         self.declare_parameter('pid_z_kd', 0.0)
+
         self.declare_parameter('pid_yaw_kp', 1.0)
         self.declare_parameter('pid_yaw_ki', 0.0)
         self.declare_parameter('pid_yaw_kd', 0.0)
@@ -54,10 +58,27 @@ class PoseController(Node):
         
         # Retrieve parameters
         self.update_rate = self.get_parameter('update_rate').value
+
         self.pose_topic = self.get_parameter('pose_topic').value
         self.cmd_vel_topic = self.get_parameter('cmd_vel_topic').value
         self.waypoint_service_name = self.get_parameter('waypoint_service').value
-        
+
+        self.pid_x_kp = self.get_parameter('pid_x_kp').value
+        self.pid_x_ki = self.get_parameter('pid_x_ki').value
+        self.pid_x_kd = self.get_parameter('pid_x_kd').value
+
+        self.pid_y_kp = self.get_parameter('pid_y_kp').value
+        self.pid_y_ki = self.get_parameter('pid_y_ki').value
+        self.pid_y_kd = self.get_parameter('pid_y_kd').value
+
+        self.pid_z_kp = self.get_parameter('pid_z_kp').value
+        self.pid_z_ki = self.get_parameter('pid_z_ki').value
+        self.pid_z_kd = self.get_parameter('pid_z_kd').value
+
+        self.pid_yaw_kp = self.get_parameter('pid_yaw_kp').value
+        self.pid_yaw_ki = self.get_parameter('pid_yaw_ki').value
+        self.pid_yaw_kd = self.get_parameter('pid_yaw_kd').value
+
         self.max_linear_vel = self.get_parameter('max_linear_vel').value
         self.max_angular_vel = self.get_parameter('max_angular_vel').value
         
@@ -74,27 +95,27 @@ class PoseController(Node):
         
         # Validate initial parameters
         init_params = [
-            Parameter('update_rate', Parameter.Type.DOUBLE, self.update_rate),
-            Parameter('pose_topic', Parameter.Type.STRING, self.pose_topic),
-            Parameter('cmd_vel_topic', Parameter.Type.STRING, self.cmd_vel_topic),
-            Parameter('waypoint_service', Parameter.Type.STRING, self.waypoint_service_name),
-            Parameter('pid_x_kp', Parameter.Type.DOUBLE, self.get_parameter('pid_x_kp').value),
-            Parameter('pid_x_ki', Parameter.Type.DOUBLE, self.get_parameter('pid_x_ki').value),
-            Parameter('pid_x_kd', Parameter.Type.DOUBLE, self.get_parameter('pid_x_kd').value),
-            Parameter('pid_y_kp', Parameter.Type.DOUBLE, self.get_parameter('pid_y_kp').value),
-            Parameter('pid_y_ki', Parameter.Type.DOUBLE, self.get_parameter('pid_y_ki').value),
-            Parameter('pid_y_kd', Parameter.Type.DOUBLE, self.get_parameter('pid_y_kd').value),
-            Parameter('pid_z_kp', Parameter.Type.DOUBLE, self.get_parameter('pid_z_kp').value),
-            Parameter('pid_z_ki', Parameter.Type.DOUBLE, self.get_parameter('pid_z_ki').value),
-            Parameter('pid_z_kd', Parameter.Type.DOUBLE, self.get_parameter('pid_z_kd').value),
-            Parameter('pid_yaw_kp', Parameter.Type.DOUBLE, self.get_parameter('pid_yaw_kp').value),
-            Parameter('pid_yaw_ki', Parameter.Type.DOUBLE, self.get_parameter('pid_yaw_ki').value),
-            Parameter('pid_yaw_kd', Parameter.Type.DOUBLE, self.get_parameter('pid_yaw_kd').value),
-            Parameter('max_linear_vel', Parameter.Type.DOUBLE, self.max_linear_vel),
-            Parameter('max_angular_vel', Parameter.Type.DOUBLE, self.max_angular_vel),
-            Parameter('position_tolerance', Parameter.Type.DOUBLE, self.position_tolerance),
-            Parameter('yaw_tolerance', Parameter.Type.DOUBLE, self.yaw_tolerance),
-            Parameter('control_enabled', Parameter.Type.BOOL, self.control_enabled),
+            Parameter('update_rate',        Parameter.Type.DOUBLE,  self.update_rate),
+            Parameter('pose_topic',         Parameter.Type.STRING,  self.pose_topic),
+            Parameter('cmd_vel_topic',      Parameter.Type.STRING,  self.cmd_vel_topic),
+            Parameter('waypoint_service',   Parameter.Type.STRING,  self.waypoint_service_name),
+            Parameter('pid_x_kp',           Parameter.Type.DOUBLE,  self.pid_x_kp),
+            Parameter('pid_x_ki',           Parameter.Type.DOUBLE,  self.pid_x_ki),
+            Parameter('pid_x_kd',           Parameter.Type.DOUBLE,  self.pid_x_kd),
+            Parameter('pid_y_kp',           Parameter.Type.DOUBLE,  self.pid_y_kp),
+            Parameter('pid_y_ki',           Parameter.Type.DOUBLE,  self.pid_y_ki),
+            Parameter('pid_y_kd',           Parameter.Type.DOUBLE,  self.pid_y_kd),
+            Parameter('pid_z_kp',           Parameter.Type.DOUBLE,  self.pid_z_kp),
+            Parameter('pid_z_ki',           Parameter.Type.DOUBLE,  self.pid_z_ki),
+            Parameter('pid_z_kd',           Parameter.Type.DOUBLE,  self.pid_z_kd),
+            Parameter('pid_yaw_kp',         Parameter.Type.DOUBLE,  self.pid_yaw_kp),
+            Parameter('pid_yaw_ki',         Parameter.Type.DOUBLE,  self.pid_yaw_ki),
+            Parameter('pid_yaw_kd',         Parameter.Type.DOUBLE,  self.pid_yaw_kd),
+            Parameter('max_linear_vel',     Parameter.Type.DOUBLE,  self.max_linear_vel),
+            Parameter('max_angular_vel',    Parameter.Type.DOUBLE,  self.max_angular_vel),
+            Parameter('position_tolerance', Parameter.Type.DOUBLE,  self.position_tolerance),
+            Parameter('yaw_tolerance',      Parameter.Type.DOUBLE,  self.yaw_tolerance),
+            Parameter('control_enabled',    Parameter.Type.BOOL,    self.control_enabled),
         ]
         
         result = self.parameter_callback(init_params)
@@ -218,33 +239,33 @@ class PoseController(Node):
     def create_pid_controllers(self):
         """Create or recreate PID controllers with current parameters."""
         self.x_pid = PID(
-            self.get_parameter('pid_x_kp').value,
-            self.get_parameter('pid_x_ki').value,
-            self.get_parameter('pid_x_kd').value,
+            self.pid_x_kp,
+            self.pid_x_ki,
+            self.pid_x_kd,
             setpoint=0,
             output_limits=(-self.max_linear_vel, self.max_linear_vel)
         )
-        
+
         self.y_pid = PID(
-            self.get_parameter('pid_y_kp').value,
-            self.get_parameter('pid_y_ki').value,
-            self.get_parameter('pid_y_kd').value,
+            self.pid_y_kp,
+            self.pid_y_ki,
+            self.pid_y_kd,
             setpoint=0,
             output_limits=(-self.max_linear_vel, self.max_linear_vel)
         )
-        
+
         self.z_pid = PID(
-            self.get_parameter('pid_z_kp').value,
-            self.get_parameter('pid_z_ki').value,
-            self.get_parameter('pid_z_kd').value,
+            self.pid_z_kp,
+            self.pid_z_ki,
+            self.pid_z_kd,
             setpoint=0,
             output_limits=(-self.max_linear_vel, self.max_linear_vel)
         )
-        
+
         self.yaw_pid = PID(
-            self.get_parameter('pid_yaw_kp').value,
-            self.get_parameter('pid_yaw_ki').value,
-            self.get_parameter('pid_yaw_kd').value,
+            self.pid_yaw_kp,
+            self.pid_yaw_ki,
+            self.pid_yaw_kd,
             setpoint=0,
             output_limits=(-self.max_angular_vel, self.max_angular_vel)
         )

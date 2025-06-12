@@ -30,7 +30,7 @@ class TelloDriver(Node):
     - Handle takeoff/land/emergency commands
     """
     def __init__(self):
-        super().__init__('tello_driver')
+        super().__init__('tello_driver_node')
         
         # Declare parameters
         # Connection
