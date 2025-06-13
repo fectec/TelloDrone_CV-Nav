@@ -1,6 +1,6 @@
 # Vision-Based Localization and Pose Control for RoboMaster TT Tello Talent Drone Trajectory Execution using ChArUco Board
 
-<p align="justify">This project is based on the work of Kenni Nilsson at the University of Southern Denmark, titled "Vision Based Navigation and Precision Landing of a Drone", developed as a master's project between fall 2020 and spring 2021 [1].</p>
+<p align="justify">This project is based on the work of Kenni Nilsson at the University of Southern Denmark, titled <a href="https://github.com/Kenil16/master_project" target="_blank">"Vision Based Navigation and Precision Landing of a Drone"</a>, developed as a master's project between fall 2020 and spring 2021 [1].</p>
 
 <p align="justify">The objective is to enable the RoboMaster TT Tello Talent Drone to reach a final pose from an initial pose, using a ChArUco board as guidance.</p>
 
