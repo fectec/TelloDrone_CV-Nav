@@ -98,7 +98,7 @@
 
 <p align="justify">The system did not achieve completely exact convergence to the target waypoint. A possible cause of this limitation lies in the fact that the constant movement of the drone during flight introduces disturbances in pose estimation. The natural vibrations of the UAV and the inherent oscillations of the control system affect the quality of captured images, which directly impacts the precision of ChArUco board detection.</p>
 
-# Usage
+## Usage
 
 <p align="justify">You can tune parameters in <code>tello_bringup/config/pose_trajectory_config.yaml</code>. Most importantly for your own application:</p>
 
