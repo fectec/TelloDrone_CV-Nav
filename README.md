@@ -31,13 +31,13 @@
 ### System Architecture
 
 <ul>
- <li><b>tello_driver_node</b> (tello_driver package): <p align="justify">Manages communication with the UAV through the <a href="https://github.com/damiafuentes/DJITelloPy" target="_blank">djitellopy</a> library. Transmits images from the lower camera and converts velocity commands into RC instructions for drone control.</p></li>
+ <li><b>tello_driver/tello_driver_node</b>: <p align="justify">Manages communication with the UAV through the <a href="https://github.com/damiafuentes/DJITelloPy" target="_blank">djitellopy</a> library. Transmits images from the lower camera and converts velocity commands into RC instructions for drone control.</p></li>
  
- <li><b>pose_estimator</b> (tello_vision package): <p align="justify">Estimates the drone's pose through ChArUco board detection using OpenCV. Publishes the estimated pose for the controller and transforms (TF) for visualization in RViz.</p></li>
+ <li><b>tello_vision/pose_estimator</b>: <p align="justify">Estimates the drone's pose through ChArUco board detection using OpenCV. Publishes the estimated pose for the controller and transforms (TF) for visualization in RViz.</p></li>
  
- <li><b>waypoint_service</b> (tello_control package): <p align="justify">Service that provides waypoints one by one upon request, defining the trajectory that the drone must follow.</p></li>
+ <li><b>tello_control/waypoint_service</b>: <p align="justify">Service that provides waypoints one by one upon request, defining the trajectory that the drone must follow.</p></li>
  
- <li><b>pose_controller</b> (tello_control package): <p align="justify">Controls the drone's movement based on current pose and target waypoints. Implements PID controllers for each degree of freedom and publishes velocity commands.</p></li>
+ <li><b>tello_control/pose_controller</b>: <p align="justify">Controls the drone's movement based on current pose and target waypoints. Implements PID controllers for each degree of freedom and publishes velocity commands.</p></li>
 </ul>
 
 ### System Flow
