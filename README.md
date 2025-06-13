@@ -4,6 +4,10 @@
 
 <p align="justify">The objective is to enable the RoboMaster TT Tello Talent Drone to reach a final pose from an initial pose, using a ChArUco board as guidance.</p>
 
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/8e05c8ab-ebcf-4278-ad66-456e38ac500d" alt="ROS2 DC Motor Control Layout" width="50%"/>
+</p>
+
 <p align="justify">As Nilsson mentions: "Using the Global Positioning System (GPS), the UAV can be programmed to fly between destinations. However, most of these systems present an error in the range of meters. To achieve greater precision, real-time kinematics (RTK) can be used, which reduces GPS error to centimeters. However, RTK is quite expensive and therefore not an optimal solution for low-cost applications. Additionally, for indoor navigation, the use of GPS would not be possible due to the reduction in signal intensity" [1].</p>
 
 <p align="justify">A viable alternative consists of incorporating cameras into the UAV and processing the data through computer vision. By placing markers in the environment, it is possible to estimate the drone's pose with sufficient precision to allow autonomous flight tasks [1].</p>
@@ -13,6 +17,8 @@
 <p align="justify">Once the drone's pose is estimated with respect to the ChArUco board, a PID controller will be implemented to guide it from an initial pose to a target pose, thus completing a trajectory.</p>
 
 ## Task Description
+
+![Trajectory Task](https://github.com/user-attachments/assets/31ab928d-3ed6-4c3d-8e3d-951eb0811c3d)
 
 <p align="justify">The ChArUco board used consists of a 9-column by 24-row grid. Each cell measures 0.1 meters per side and alternates between black squares and ArUco markers, which have a size of 0.08 meters. In total, the board has dimensions of 0.9 × 2.4 meters.</p>
 
