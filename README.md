@@ -1,12 +1,14 @@
 # Vision-Based Localization and Pose Control for RoboMaster TT Tello Talent Drone Trajectory Execution using ChArUco Board
 
-<p align="justify">This project is based on the work of Kenni Nilsson at the University of Southern Denmark, titled <a href="https://github.com/Kenil16/master_project" target="_blank">"Vision Based Navigation and Precision Landing of a Drone"</a>, developed as a master's project between fall 2020 and spring 2021 [1].</p>
+<p align="justify">Developed for the Unmanned Aerial Vehicles (UAVs) module in the undergraduate course "Intelligent Robotics Implementation."</p>
 
-<p align="justify">The objective is to enable the RoboMaster TT Tello Talent Drone to reach a final pose from an initial pose, using a ChArUco board as guidance.</p>
+<p align="justify">This project is based on the work of Kenni Nilsson at the University of Southern Denmark, titled <a href="https://github.com/Kenil16/master_project" target="_blank">"Vision Based Navigation and Precision Landing of a Drone"</a>, developed as a master's project between fall 2020 and spring 2021 [1].</p>
 
 <p align="center">
   <img src="https://github.com/user-attachments/assets/8e05c8ab-ebcf-4278-ad66-456e38ac500d" alt="ROS2 DC Motor Control Layout" width="50%"/>
 </p>
+
+<p align="justify">The objective is to enable the RoboMaster TT Tello Talent Drone to reach a final pose from an initial pose, using a ChArUco board as guidance.</p>
 
 <p align="justify">As Nilsson mentions: "Using the Global Positioning System (GPS), the UAV can be programmed to fly between destinations. However, most of these systems present an error in the range of meters. To achieve greater precision, real-time kinematics (RTK) can be used, which reduces GPS error to centimeters. However, RTK is quite expensive and therefore not an optimal solution for low-cost applications. Additionally, for indoor navigation, the use of GPS would not be possible due to the reduction in signal intensity" [1].</p>
 
@@ -101,6 +103,10 @@
  <li>Y position error: 0.01m</li>
  <li>Z position error: 0.1m</li>
 </ul>
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/6a5109c4-a40f-4b7b-aab3-571676889e94" alt="Demo" width="80%"/>
+</p>
 
 <p align="justify">The system did not achieve completely exact convergence to the target waypoint. A possible cause of this limitation lies in the fact that the constant movement of the drone during flight introduces disturbances in pose estimation. The natural vibrations of the UAV and the inherent oscillations of the control system affect the quality of captured images, which directly impacts the precision of ChArUco board detection.</p>
 
