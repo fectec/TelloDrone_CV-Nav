@@ -1,8 +1,6 @@
 # Vision-Based Localization and Pose Control for RoboMaster TT Tello Talent Drone Trajectory Execution using ChArUco Board
 
-<p align="justify">Developed for the Unmanned Aerial Vehicles (UAVs) module in the undergraduate course "Intelligent Robotics Implementation."</p>
-
-<p align="justify">This project is based on the work of Kenni Nilsson at the University of Southern Denmark, titled <a href="https://github.com/Kenil16/master_project" target="_blank">"Vision Based Navigation and Precision Landing of a Drone"</a>, developed as a master's project between fall 2020 and spring 2021 [1].</p>
+<p align="justify">Developed for the Unmanned Aerial Vehicles (UAVs) module in the undergraduate course <b>"Intelligent Robotics Implementation."</b> This project is based on the work of Kenni Nilsson at the University of Southern Denmark, titled <a href="https://github.com/Kenil16/master_project" target="_blank">"Vision Based Navigation and Precision Landing of a Drone"</a>, developed as a master's project between fall 2020 and spring 2021 [1].</p>
 
 <p align="center">
   <img src="https://github.com/user-attachments/assets/8e05c8ab-ebcf-4278-ad66-456e38ac500d" alt="ROS2 DC Motor Control Layout" width="50%"/>
